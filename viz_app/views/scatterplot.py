@@ -1,5 +1,8 @@
+import random
+
 from dash import dcc, html
 import plotly.graph_objects as go
+
 
 
 class Scatterplot(html.Div):
@@ -18,13 +21,13 @@ class Scatterplot(html.Div):
             ],
         )
 
-    def update(self, selected_color, selected_data):
+    def update(self, selected_color):
         self.fig = go.Figure()
 
         x_values = self.df[self.feature_x]
         y_values = self.df[self.feature_y]
         self.fig.add_trace(go.Scatter(
-            x=x_values, 
+            x=x_values,
             y=y_values,
             mode='markers',
             marker_color='rgb(200,200,200)'
@@ -38,14 +41,7 @@ class Scatterplot(html.Div):
         self.fig.update_xaxes(fixedrange=True)
         self.fig.update_yaxes(fixedrange=True)
 
-        # highlight points with selection other graph
-        if selected_data is None:
-            selected_index = self.df.index  # show all
-        else:
-            selected_index = [  # show only selected indices
-                x.get('pointIndex', None)
-                for x in selected_data['points']
-            ]
+        selected_index = self.df.index  # show all
 
         self.fig.data[0].update(
             selectedpoints=selected_index,
