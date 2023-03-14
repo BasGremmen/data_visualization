@@ -1,3 +1,5 @@
+import pandas as pd
+
 from viz_app.main import app
 from viz_app.views.menu import make_menu_layout
 from viz_app.views.scatterplot import Scatterplot
@@ -35,7 +37,8 @@ if __name__ == '__main__':
                 id="right-column",
                 className="nine columns",
                 children=[
-                    dcc.Graph(id="graph")
+                    dcc.Graph(id="graph"),
+                    dcc.Graph(id="player-details"),
                 ],
             ),
         ],
@@ -66,6 +69,29 @@ if __name__ == '__main__':
     def update_bar_chart(table, feature, team):
         df = get_player_data(table)
         fig = px.bar(df[df['team'] == team], x='player', y=feature)
+        return fig
+
+
+    @app.callback(
+        Output('player-details', 'figure'),
+        Input("graph", "clickData"),
+        Input("data-select", "value"),
+        Input("team-select", "value")
+    )
+    def update_player_details(data, table, team):
+        df = get_player_data(table)
+        if data:
+            player = data['points'][0]['label']
+        else:
+            player = df[df['team'] == team].iloc[0]['player']
+
+        cols = [col for col in df if df[col].dtypes == "float64"]
+
+        player_input = pd.DataFrame(dict(
+            r=list(df[df['player'] == player][cols].iloc[0]),
+            theta=cols))
+
+        fig = px.line_polar(player_input, r='r', theta='theta', line_close=True)
         return fig
 
 
