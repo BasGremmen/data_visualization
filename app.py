@@ -49,8 +49,9 @@ if __name__ == '__main__':
         Input('data-select', 'value'),
     )
     def update_feature_options(table):
-        options = get_player_data(table).columns
-        return [{'label': i, 'value': i} for i in options if i not in ['team', 'player']]
+        df = get_player_data(table)
+        cols = [col for col in df if df[col].dtypes == "float64"]
+        return [{'label': i, 'value': i} for i in cols if i not in ['team', 'player']]
 
     @app.callback(
         Output('feature-select', 'value'),
