@@ -1,6 +1,6 @@
 from dash import dcc, html
-from ..config import color_list1, color_list2
-
+from viz_app.data import get_player_data, get_team_data
+from ..config import player_tables
 
 def generate_description_card():
     """
@@ -27,11 +27,23 @@ def generate_control_card():
     return html.Div(
         id="control-card",
         children=[
-            html.Label("Color scatterplot 1"),
+            html.Label("Select data"),
             dcc.Dropdown(
-                id="select-color-scatter-1",
-                options=[{"label": i, "value": i} for i in color_list1],
-                value=color_list1[0],
+                id="data-select",
+                options=[{"label": i, "value": i} for i in player_tables],
+                value=player_tables[0]
+            ),
+            html.Label("Filter players by team"),
+            dcc.Dropdown(
+                id="team-select",
+                options=[{"label": i, "value": i} for i in get_team_data('team_data')['team']],
+                value=get_team_data('team_data')['team'][0]
+            ),
+            html.Label("Select feature for bar chart"),
+            dcc.Dropdown(
+                id="feature-select",
+                options=[{"label": i, "value": i} for i in get_player_data('player_defense').columns[1:]],
+                value=get_player_data('player_defense').columns[1],
             ),
         ], style={"textAlign": "float-left"}
     )
