@@ -17,11 +17,11 @@ theme = {
     'secondary': '#6E6E6E',
 }
 
-
 if __name__ == '__main__':
     # Create data
     df = get_player_data('player_defense')
 
+    plus_icon = html.I(className="fa fa-plus", style=dict(display="inline-block"))
     app.layout = html.Div(
         id="app-container",
         children=[
@@ -37,8 +37,31 @@ if __name__ == '__main__':
                 id="right-column",
                 className="nine columns",
                 children=[
-                    dcc.Graph(id="graph"),
-                    dcc.Graph(id="player-details"),
+                    html.Div(id="graph-block",
+                             className="row",
+                             style={"background": "white"},
+                             children=[html.Label("Select feature for bar chart"),
+                                       dcc.Dropdown(
+                                           id="feature-select",
+                                           className="three columns",
+                                           options=[{"label": i, "value": i} for i in
+                                                    get_player_data('player_defense').columns[1:]],
+                                           value=get_player_data('player_defense').columns[1],
+                                       ),
+                                       dcc.Graph(id="graph", className="nine columns")
+                                       ]),
+                    html.Br(),
+
+                    html.Div(
+                        id="player-block",
+                        style={"background": "white"},
+                        className="row",
+                        children=[
+                            html.H1(id="player-name", style={"textAlign": "center"}),
+                            dcc.Graph(id="player-details"),
+                            html.Button(children=[plus_icon], style={"float": "right"})
+                            ]
+                    )
                 ],
             ),
         ],
@@ -75,6 +98,7 @@ if __name__ == '__main__':
 
     @app.callback(
         Output('player-details', 'figure'),
+        Output('player-name', 'children'),
         Input("graph", "clickData"),
         Input("data-select", "value"),
         Input("team-select", "value")
@@ -93,7 +117,7 @@ if __name__ == '__main__':
             theta=cols))
 
         fig = px.line_polar(player_input, r='r', theta='theta', line_close=True)
-        return fig
+        return fig, player
 
 
     app.run_server(debug=False, dev_tools_ui=False)

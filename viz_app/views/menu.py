@@ -39,12 +39,7 @@ def generate_control_card():
                 options=[{"label": i, "value": i} for i in get_team_data('team_data')['team']],
                 value=get_team_data('team_data')['team'][0]
             ),
-            html.Label("Select feature for bar chart"),
-            dcc.Dropdown(
-                id="feature-select",
-                options=[{"label": i, "value": i} for i in get_player_data('player_defense').columns[1:]],
-                value=get_player_data('player_defense').columns[1],
-            ),
+
         ], style={"textAlign": "float-left"}
     )
 
