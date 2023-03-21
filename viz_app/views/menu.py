@@ -27,7 +27,12 @@ def generate_control_card():
     return html.Div(
         id="control-card",
         children=[
-            html.Label("Select data"),
+            html.Div(id="discover-button",
+                     children="Discover"),
+            html.Div(id="search-button",
+                     children="Search"),
+            html.Div(id="compare-button",
+                     children="Compare"),
             dcc.Dropdown(
                 id="data-select",
                 options=[{"label": i, "value": i} for i in player_tables],

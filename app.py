@@ -51,7 +51,6 @@ if __name__ == '__main__':
                                        dcc.Graph(id="graph", className="nine columns")
                                        ]),
                     html.Br(),
-
                     html.Div(
                         id="player-block",
                         style={"background": "white"},
