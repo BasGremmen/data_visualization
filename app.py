@@ -2,12 +2,14 @@ import pandas as pd
 
 from viz_app.main import app
 from viz_app.views.menu import make_menu_layout
-from viz_app.views.scatterplot import Scatterplot
 from viz_app.data import get_player_data
+from viz_app.views.graph_column import generate_wrapper
 
 from dash import html, dcc
 import plotly.express as px
 from dash.dependencies import Input, Output
+from dotenv import load_dotenv
+
 
 
 theme = {
@@ -18,51 +20,21 @@ theme = {
 }
 
 if __name__ == '__main__':
+    load_dotenv()
     # Create data
     df = get_player_data('player_defense')
 
-    plus_icon = html.I(className="fa fa-plus", style=dict(display="inline-block"))
+
     app.layout = html.Div(
         id="app-container",
         children=[
-            # Left column
-            html.Div(
-                id="left-column",
-                className="three columns",
-                children=make_menu_layout()
-            ),
+            # Left menu column
+            make_menu_layout()
+            ,
 
             # Right column
-            html.Div(
-                id="right-column",
-                className="nine columns",
-                children=[
-                    html.Div(id="graph-block",
-                             className="row",
-                             style={"background": "white"},
-                             children=[html.Label("Select feature for bar chart"),
-                                       dcc.Dropdown(
-                                           id="feature-select",
-                                           className="three columns",
-                                           options=[{"label": i, "value": i} for i in
-                                                    get_player_data('player_defense').columns[1:]],
-                                           value=get_player_data('player_defense').columns[1],
-                                       ),
-                                       dcc.Graph(id="graph", className="nine columns")
-                                       ]),
-                    html.Br(),
-                    html.Div(
-                        id="player-block",
-                        style={"background": "white"},
-                        className="row",
-                        children=[
-                            html.H1(id="player-name", style={"textAlign": "center"}),
-                            dcc.Graph(id="player-details"),
-                            html.Button(children=[plus_icon], style={"float": "right"})
-                            ]
-                    )
-                ],
-            ),
+            generate_wrapper()
+            ,
         ],
     )
 

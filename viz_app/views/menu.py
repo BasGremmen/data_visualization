@@ -50,4 +50,9 @@ def generate_control_card():
 
 
 def make_menu_layout():
-    return [generate_description_card(), generate_control_card()]
+    return html.Div(
+            id="left-column",
+            className="three columns",
+            children=[generate_description_card(), generate_control_card()]
+        )
+

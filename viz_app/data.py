@@ -1,16 +1,19 @@
 import pandas as pd
+import os
 
 
 def get_player_data(table):
+    data_path = os.getenv('DATA_PATH')
 
-    player_data_path = "C:\\Users\\bgrem\\Documents\\Repositories\\data_visualization\\data\\Fifa World Cup 2022 Player Data\\{}.csv".format(table)
+    player_data_path = "{}Fifa World Cup 2022 Player Data\\{}.csv".format(data_path, table)
     df = pd.read_csv(player_data_path)
 
     return df
 
 
 def get_team_data(table):
-    team_data_path = "C:\\Users\\bgrem\\Documents\\Repositories\\data_visualization\\data\\Fifa World Cup 2022 Team Data\\{}.csv".format(table)
+    data_path = os.getenv('DATA_PATH')
+    team_data_path = "{}Fifa World Cup 2022 Team Data\\{}.csv".format(data_path, table)
     df = pd.read_csv(team_data_path)
 
     return df
