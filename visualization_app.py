@@ -8,7 +8,7 @@ import plotly.graph_objs as go
 import plotly.express as px
 from dash import html, dcc
 
-data_path = "C:\\Users\\bgrem\\Documents\\Data visualization\\JM0250 Data (2022-2023)\\JM0250 Data (2022-2023)\\Data\\"
+data_path = "C:\\Users\\tomva\\Bureaublad\\DSBE\\Visualization\\Data\\Data\\"
 
 # Load your CSV files
 shooting_stats = pd.read_csv("{}Fifa World Cup 2022 Player Data\\player_shooting.csv".format(data_path))
@@ -25,12 +25,13 @@ theme = {
 }
 
 # Columns to exclude from radar chart
-exclude_columns = {'age', 'position', 'birth_year'}
+exclude_columns = {'birth_year'}
 
 if __name__ == '__main__':
+
     app.layout = html.Div(
         id="app-container",
-        children= [
+        children=[
             html.Div([
                 html.H1('Soccer Scout Dashboard', style={'textAlign': 'center'}),
             ]),
@@ -113,17 +114,41 @@ if __name__ == '__main__':
                                 style={'width': '100%'}
                             ),
                         ], className='six columns'),
+                    ], className='row', style={'marginBottom': '10px'}),
+
+                    html.Div([
+                        html.Div([
+                            html.Label('Filter by Age'),
+                            dcc.RangeSlider(
+                                id='age-range-slider',
+                                min=15,
+                                max=40,
+                                value=[15, 40],
+                                marks={i: f'{i}' for i in range(15, 41, 5)}
+                            ),
+                        ], className='six columns'),
 
                         html.Div([
-                            dcc.Graph(id='top-players-chart', clickData=None),
-                        ], className='twelve columns', style={'marginBottom': '20px'}),
-                        html.Div([
-                            dcc.Graph(id='explore-radar-chart'),
-                        ], className='twelve columns', style={'marginBottom': '20px'}),
+                            html.Label('Filter by Position'),
+                            dcc.Dropdown(
+                                id='position-dropdown',
+                                options=[{'label': pos, 'value': pos} for pos in ['GK', 'DF', 'MF', 'FW']],
+                                multi=True,
+                                style={'width': '100%'}
+                            ),
+                        ], className='six columns'),
                     ], className='row', style={'marginBottom': '10px'}),
-            ]),
+
+                    html.Div([
+                        dcc.Graph(id='top-players-chart', clickData=None),
+                    ], className='twelve columns', style={'marginBottom': '20px'}),
+
+                    html.Div([
+                        dcc.Graph(id='explore-radar-chart'),
+                    ], className='twelve columns', style={'marginBottom': '20px'}),
+                ]),
+            ])
         ])
-    ])
 
 
     @app.callback(
@@ -246,8 +271,11 @@ if __name__ == '__main__':
     @app.callback(
         Output('top-players-chart', 'figure'),
         Output('explore-feature-dropdown', 'options'),
-        Input('explore-stats-dropdown', 'value'))
-    def update_explore_dropdown_and_chart(selected_stat):
+        Input('explore-stats-dropdown', 'value'),
+        Input('explore-feature-dropdown', 'value'),
+        Input('age-range-slider', 'value'),
+        Input('position-dropdown', 'value'))
+    def update_explore_dropdown_and_chart(selected_stat, selected_feature, age_range, positions):
         if selected_stat is None:
             return go.Figure(), []
 
@@ -255,8 +283,19 @@ if __name__ == '__main__':
         features = df.columns.difference(['player', 'team']).difference(exclude_columns)
         feature_options = [{'label': feature, 'value': feature} for feature in features]
 
+        # Update the selected feature when the dataset changes
+        if selected_feature not in features:
+            selected_feature = features[0]
+
+            # Filter by age
+        df_filtered = df[(df['age'] >= age_range[0]) & (df['age'] <= age_range[1])]
+
+        # Filter by position
+        if positions:
+            df_filtered = df_filtered[df_filtered['position'].isin(positions)]
+
         # Create the bar chart using Plotly Graph Objects
-        top_players = df.nlargest(10, features[0])
+        top_players = df_filtered.nlargest(10, selected_feature).sort_values(by=selected_feature, ascending=False)
 
         # Bar colors
         bar_colors = px.colors.qualitative.Plotly[:10]
@@ -266,19 +305,20 @@ if __name__ == '__main__':
         fig.add_trace(
             go.Bar(
                 x=top_players['player'],
-                y=top_players[features[0]],
+                y=top_players[selected_feature],
                 customdata=top_players[['player']].values,
                 marker_color=bar_colors
             )
         )
 
-        fig.update_layout(title=f'Top 10 Players in {features[0]}', xaxis_title='Player', yaxis_title=features[0])
+        fig.update_layout(title=f'Top 10 Players in {selected_feature}', xaxis_title='Player',
+                          yaxis_title=selected_feature)
 
         return fig.update_layout(legend=dict(font=dict(family='Arial')),
-                                 xaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=True,
-                                            ticks=''),
-                                 yaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=True,
-                                            ticks='')), feature_options
+                                 xaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1,
+                                            showticklabels=True, ticks=''),
+                                 yaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1,
+                                            showticklabels=True, ticks='')), feature_options
 
 
     @app.callback(
