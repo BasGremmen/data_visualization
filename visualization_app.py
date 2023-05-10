@@ -1,4 +1,6 @@
 from viz_app.main import app
+from viz_app.config import player_tables
+from viz_app.data import get_player_data
 from dash.dependencies import Input, Output, State
 import pandas as pd
 import plotly.graph_objs as go
@@ -13,10 +15,7 @@ shooting_stats = pd.read_csv("{}Fifa World Cup 2022 Player Data\\player_shooting
 defending_stats = pd.read_csv("{}Fifa World Cup 2022 Player Data\\player_defense.csv".format(data_path))
 
 # Create a dictionary for easier DataFrame access
-dataframes = {
-    'shooting': shooting_stats,
-    'defending': defending_stats,
-}
+dataframes = {table: get_player_data(table) for table in player_tables}
 
 theme = {
     'dark': True,

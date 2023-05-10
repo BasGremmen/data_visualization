@@ -15,3 +15,5 @@ player_tables = \
      'player_shooting',
      'player_stats']
 
+data_path = "C:\\Users\\bgrem\\Documents\\Data visualization\\JM0250 Data (2022-2023)\\JM0250 Data (2022-2023)\\Data\\"
+
