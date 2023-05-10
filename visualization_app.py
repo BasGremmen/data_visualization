@@ -8,12 +8,6 @@ import plotly.graph_objs as go
 import plotly.express as px
 from dash import html, dcc
 
-data_path = "C:\\Users\\bgrem\\Documents\\Data visualization\\JM0250 Data (2022-2023)\\JM0250 Data (2022-2023)\\Data\\"
-
-# Load your CSV files
-shooting_stats = pd.read_csv("{}Fifa World Cup 2022 Player Data\\player_shooting.csv".format(data_path))
-defending_stats = pd.read_csv("{}Fifa World Cup 2022 Player Data\\player_defense.csv".format(data_path))
-
 # Create a dictionary for easier DataFrame access
 dataframes = {table: get_player_data(table) for table in player_tables}
 
@@ -182,7 +176,6 @@ if __name__ == '__main__':
         Input('feature-dropdown', 'value'),
         Input('player-dropdown', 'value'))
     def update_radar_chart(selected_stat, selected_features, selected_players):
-        radar_colors = px.colors.qualitative.Plotly[:len(selected_players)]
         if selected_stat is None or selected_features is None or not selected_features or selected_players is None or not selected_players:
             return go.Figure()
 
