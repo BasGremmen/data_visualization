@@ -16,19 +16,45 @@ theme = {
     'secondary': '#6E6E6E',
 }
 
-if __name__ == '__main__':
+tab_style = {
+    "border-style": "solid",
+    "border": "1px 0 0 0",
+    "border-color": "grey"
+}
 
+selected_tab_style = {
+    "border-style": "solid",
+    "border": "1px 0 0 0",
+    "border-color": "grey"
+}
+
+if __name__ == '__main__':
     app.layout = html.Div(
         id="app-container",
         children=[
-            html.Div([
-                html.H1('Soccer Scout Dashboard', style={'textAlign': 'center'}),
-            ]),
+            dcc.Store(id='selected-players'),
+            html.Div(children=[
+                html.H1('Scoutlier', style={'text-align': 'center'}),
+                html.Div([
+                dcc.Tabs(id="tabs-select", value='tab-explore', children=[
+                    dcc.Tab(label='Explore', value='tab-explore', selected_style=selected_tab_style, style=tab_style),
+                    dcc.Tab(label='Search', value='tab-search', selected_style=selected_tab_style, style=tab_style)
+                ], vertical=True, mobile_breakpoint=None)])], className='three columns'),
 
-            dcc.Tabs([
-                search.layout,
+            html.Div(id='tab-view', children=[
                 explore.layout
-            ]),
+            ], className='nine columns'),
         ])
+
+
+    @app.callback(
+        Output('tab-view', 'children'),
+        Input('tabs-select', 'value'))
+    def change_tab(tab):
+        if tab == 'tab-explore':
+            return explore.layout
+        elif tab == 'tab-search':
+            return search.layout
+
 
     app.run_server(debug=False, dev_tools_ui=False)

@@ -58,10 +58,9 @@ layout = dcc.Tab(label='Find Players', children=[
     ], className='row'),
 
     html.Div([
-        html.Div([
-            dcc.Graph(id='scatter-plot'),
-        ], className='twelve columns', style={'marginBottom': '20px'}),
-    ], className='row'),
+        dcc.Graph(id='scatter-plot'),
+
+    ], className='row', style={"marginBottom": '20px'}),
 ])
 
 
