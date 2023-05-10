@@ -8,7 +8,7 @@ import plotly.graph_objs as go
 import plotly.express as px
 from dash import html, dcc
 
-data_path = "C:\\Users\\tomva\\Bureaublad\\DSBE\\Visualization\\Data\\Data\\"
+data_path = "C:\\Users\\bgrem\\Documents\\Data visualization\\JM0250 Data (2022-2023)\\JM0250 Data (2022-2023)\\Data\\"
 
 # Load your CSV files
 shooting_stats = pd.read_csv("{}Fifa World Cup 2022 Player Data\\player_shooting.csv".format(data_path))
@@ -207,7 +207,6 @@ if __name__ == '__main__':
         Input('feature-dropdown', 'value'),
         Input('player-dropdown', 'value'))
     def update_radar_chart(selected_stat, selected_features, selected_players):
-        radar_colors = px.colors.qualitative.Plotly[:len(selected_players)]
         if selected_stat is None or selected_features is None or not selected_features or selected_players is None or not selected_players:
             return go.Figure()
 
@@ -279,23 +278,27 @@ if __name__ == '__main__':
         if selected_stat is None:
             return go.Figure(), []
 
-        df = dataframes[selected_stat]
-        features = df.columns.difference(['player', 'team']).difference(exclude_columns)
+        df = dataframes[selected_stat].copy()
+        df['age'] = df['age'].apply(lambda x: x[:2])
+        df['age'] = pd.to_numeric(df['age'])
+        features = df.columns.difference([*exclude_columns, 'team', 'club'])
         feature_options = [{'label': feature, 'value': feature} for feature in features]
 
         # Update the selected feature when the dataset changes
         if selected_feature not in features:
             selected_feature = features[0]
 
+        if age_range is not None:
             # Filter by age
-        df_filtered = df[(df['age'] >= age_range[0]) & (df['age'] <= age_range[1])]
+            df = df[(df['age'] >= age_range[0]) & (df['age'] <= age_range[1])]
 
-        # Filter by position
-        if positions:
-            df_filtered = df_filtered[df_filtered['position'].isin(positions)]
+        if positions is not None:
+            # Filter by position
+            if positions:
+                df = df[df['position'].isin(positions)]
 
         # Create the bar chart using Plotly Graph Objects
-        top_players = df_filtered.nlargest(10, selected_feature).sort_values(by=selected_feature, ascending=False)
+        top_players = df.nlargest(10, selected_feature).sort_values(by=selected_feature, ascending=False)
 
         # Bar colors
         bar_colors = px.colors.qualitative.Plotly[:10]
@@ -349,7 +352,7 @@ if __name__ == '__main__':
 
         layout = go.Layout(
             title=f'Radar chart of selected players',
-            polar=dict(radialaxis=dict(visible=True, range=[0, max(df[features].max().max(), 1)])),
+            polar=dict(radialaxis=dict(visible=True, range=[0, max(df[features], 1)])),
             showlegend=True
         )
 
