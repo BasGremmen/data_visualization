@@ -6,70 +6,69 @@ from viz_app.main import dataframes, exclude_columns
 from viz_app.config import player_tables
 
 layout = dcc.Tab(label='Find Players', children=[
-                    html.Div([
-                        html.Div([
-                            html.Label('Select Stat Category'),
-                            dcc.Dropdown(
-                                id='stats-dropdown',
-                                options=[{'label': stat, 'value': stat} for stat in dataframes.keys()],
-                                style={'width': '100%'}
-                            ),
-                        ], className='six columns'),
+    html.Div([
+        html.Div([
+            html.Label('Select Stat Category'),
+            dcc.Dropdown(
+                id='stats-dropdown',
+                options=[{'label': stat, 'value': stat} for stat in player_tables],
+                style={'width': '100%'}
+            ),
+        ], className='six columns'),
 
-                        html.Div([
-                            html.Label('Select Features'),
-                            dcc.Dropdown(
-                                id='feature-dropdown',
-                                multi=True,
-                                style={'width': '100%'}
-                            ),
-                        ], className='six columns'),
-                    ], className='row', style={'marginBottom': '10px'}),
+        html.Div([
+            html.Label('Select Features'),
+            dcc.Dropdown(
+                id='feature-dropdown',
+                multi=True,
+                style={'width': '100%'}
+            ),
+        ], className='six columns'),
+    ], className='row', style={'marginBottom': '10px'}),
 
-                    html.Div([
-                        html.Div([
-                            html.Label('Select Teams'),
-                            dcc.Dropdown(
-                                id='team-dropdown',
-                                multi=True,
-                                placeholder='Select teams',
-                                style={'width': '100%'}
-                            ),
-                        ], className='six columns'),
+    html.Div([
+        html.Div([
+            html.Label('Select Teams'),
+            dcc.Dropdown(
+                id='team-dropdown',
+                multi=True,
+                placeholder='Select teams',
+                style={'width': '100%'}
+            ),
+        ], className='six columns'),
 
-                        html.Div([
-                            html.Label('Select Players'),
-                            dcc.Dropdown(
-                                id='player-dropdown',
-                                multi=True,
-                                style={'width': '100%'}
-                            ),
-                        ], className='six columns'),
-                    ], className='row', style={'marginBottom': '10px'}),
+        html.Div([
+            html.Label('Select Players'),
+            dcc.Dropdown(
+                id='player-dropdown',
+                multi=True,
+                style={'width': '100%'}
+            ),
+        ], className='six columns'),
+    ], className='row', style={'marginBottom': '10px'}),
 
-                    html.Div([
-                        html.Div([
-                            dcc.Graph(id='bar-chart'),
-                        ], className='six columns', style={'marginBottom': '20px'}),
+    html.Div([
+        html.Div([
+            dcc.Graph(id='bar-chart'),
+        ], className='six columns', style={'marginBottom': '20px'}),
 
-                        html.Div([
-                            dcc.Graph(id='radar-chart'),
-                        ], className='six columns', style={'marginBottom': '20px'}),
-                    ], className='row'),
+        html.Div([
+            dcc.Graph(id='radar-chart'),
+        ], className='six columns', style={'marginBottom': '20px'}),
+    ], className='row'),
 
-                    html.Div([
-                        html.Div([
-                            dcc.Graph(id='scatter-plot'),
-                        ], className='twelve columns', style={'marginBottom': '20px'}),
-                    ], className='row'),
-                ])
+    html.Div([
+        html.Div([
+            dcc.Graph(id='scatter-plot'),
+        ], className='twelve columns', style={'marginBottom': '20px'}),
+    ], className='row'),
+])
+
 
 @callback(
     Output('feature-dropdown', 'options'),
     Output('team-dropdown', 'options'),
     Input('stats-dropdown', 'value'))
-
-
 def update_feature_and_team_dropdown(selected_stat):
     if selected_stat is None:
         return [], []

@@ -7,29 +7,33 @@ from viz_app.config import player_tables
 
 layout = dcc.Tab(label='Explore Players', children=[
     html.Div([
-        html.Label('Select Stat Category'),
-        dcc.Dropdown(
-            id='explore-stats-dropdown',
-            options=[{'label': stat, 'value': stat} for stat in player_tables],
-            style={'width': '100%'}
-        ),
-    ], className='six columns'),
+        html.Div([
+            html.Label('Select Stat Category'),
+            dcc.Dropdown(
+                id='explore-stats-dropdown',
+                options=[{'label': stat, 'value': stat} for stat in player_tables],
+                style={'width': '100%'}
+            ),
+        ], className='six columns'),
+
+        html.Div([
+            html.Label('Select Feature'),
+            dcc.Dropdown(
+                id='explore-feature-dropdown',
+                style={'width': '100%'}
+            ),
+        ], className='six columns'),
+    ], className='row', style={'marginBottom': '10px'}),
 
     html.Div([
-        html.Label('Select Feature'),
-        dcc.Dropdown(
-            id='explore-feature-dropdown',
-            style={'width': '100%'}
-        ),
-    ], className='six columns'),
-
-    html.Div([
-        dcc.Graph(id='top-players-chart', clickData=None),
-    ], className='twelve columns', style={'marginBottom': '20px'}),
-    html.Div([
-        dcc.Graph(id='explore-radar-chart'),
-    ], className='twelve columns', style={'marginBottom': '20px'}),
-], className='row', style={'marginBottom': '10px'})
+        html.Div([
+            dcc.Graph(id='top-players-chart', clickData=None),
+        ], className='six columns'),
+        html.Div([
+            dcc.Graph(id='explore-radar-chart'),
+        ], className='six columns'),
+    ], className='row', style={'marginBottom': '10px'}),
+])
 
 
 @callback(
@@ -73,8 +77,6 @@ def update_explore_radar_chart(clickData, selected_stat, selected_feature):
     Output('top-players-chart', 'figure'),
     Output('explore-feature-dropdown', 'options'),
     Input('explore-stats-dropdown', 'value'))
-
-
 def update_explore_dropdown_and_chart(selected_stat):
     if selected_stat is None:
         return go.Figure(), []
