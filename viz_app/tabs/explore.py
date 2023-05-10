@@ -1,7 +1,11 @@
 from dash import callback, Input, Output, dcc, html, Dash, State
-from ..config import player_tables
+import plotly.graph_objs as go
+import plotly.express as px
 
-layout = html.Div([
+from viz_app.main import dataframes, exclude_columns
+from viz_app.config import player_tables
+
+layout = dcc.Tab(label='Explore Players', children=[
     html.Div([
         html.Label('Select Stat Category'),
         dcc.Dropdown(
@@ -33,8 +37,6 @@ layout = html.Div([
     Input('top-players-chart', 'clickData'),
     State('explore-stats-dropdown', 'value'),
     State('explore-feature-dropdown', 'value'))
-
-
 def update_explore_radar_chart(clickData, selected_stat, selected_feature):
     if clickData is None or selected_stat is None:
         return go.Figure()
@@ -65,3 +67,43 @@ def update_explore_radar_chart(clickData, selected_stat, selected_feature):
     return go.Figure(data=radar_data, layout=layout).update_layout(legend=dict(font=dict(family='Arial')), polar=dict(
         radialaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=False, ticks=''),
         angularaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=True, ticks='')))
+
+
+@callback(
+    Output('top-players-chart', 'figure'),
+    Output('explore-feature-dropdown', 'options'),
+    Input('explore-stats-dropdown', 'value'))
+
+
+def update_explore_dropdown_and_chart(selected_stat):
+    if selected_stat is None:
+        return go.Figure(), []
+
+    df = dataframes[selected_stat]
+    features = df.columns.difference(['player', 'team']).difference(exclude_columns)
+    feature_options = [{'label': feature, 'value': feature} for feature in features]
+
+    # Create the bar chart using Plotly Graph Objects
+    top_players = df.nlargest(10, features[0])
+
+    # Bar colors
+    bar_colors = px.colors.qualitative.Plotly[:10]
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Bar(
+            x=top_players['player'],
+            y=top_players[features[0]],
+            customdata=top_players[['player']].values,
+            marker_color=bar_colors
+        )
+    )
+
+    fig.update_layout(title=f'Top 10 Players in {features[0]}', xaxis_title='Player', yaxis_title=features[0])
+
+    return fig.update_layout(legend=dict(font=dict(family='Arial')),
+                             xaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=True,
+                                        ticks=''),
+                             yaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=True,
+                                        ticks='')), feature_options
