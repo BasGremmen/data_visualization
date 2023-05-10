@@ -73,7 +73,7 @@ def update_feature_and_team_dropdown(selected_stat):
     if selected_stat is None:
         return [], []
 
-    df = dataframes[selected_stat]
+    df = dataframes[selected_stat].copy()
     teams = df['team'].unique()
     team_options = [{'label': team, 'value': team} for team in teams]
 
@@ -91,7 +91,7 @@ def update_player_dropdown(selected_teams, selected_stat):
     if selected_teams is None or not selected_teams or selected_stat is None:
         return []
 
-    df = dataframes[selected_stat]
+    df = dataframes[selected_stat].copy()
     players = df[df['team'].isin(selected_teams)]['player'].unique()
     return [{'label': player, 'value': player} for player in players]
 
@@ -105,7 +105,7 @@ def update_bar_chart(selected_stat, selected_features, selected_players):
     if selected_stat is None or selected_features is None or not selected_features or selected_players is None or not selected_players:
         return go.Figure()
 
-    df = dataframes[selected_stat]
+    df = dataframes[selected_stat].copy()
     bar_data = df[df['player'].isin(selected_players)]
 
     # Bar colors
@@ -124,7 +124,7 @@ def update_radar_chart(selected_stat, selected_features, selected_players):
     if selected_stat is None or selected_features is None or not selected_features or selected_players is None or not selected_players:
         return go.Figure()
 
-    df = dataframes[selected_stat]
+    df = dataframes[selected_stat].copy()
     radar_data = []
 
     for player in selected_players:
@@ -159,7 +159,7 @@ def update_scatter_plot(selected_stat, selected_features, selected_players):
             selected_features) < 2 or selected_players is None or not selected_players:
         return go.Figure()
 
-    df = dataframes[selected_stat]
+    df = dataframes[selected_stat].copy()
     selected_data = df[df['player'].isin(selected_players)]
 
     fig = go.Figure()

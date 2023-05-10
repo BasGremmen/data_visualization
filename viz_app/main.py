@@ -9,6 +9,6 @@ app = Dash(__name__, external_stylesheets=["https://use.fontawesome.com/releases
 dataframes = {table: get_player_data(table) for table in player_tables}
 
 # Columns to exclude from radar chart
-exclude_columns = {'age', 'position', 'birth_year'}
+exclude_columns = {'birth_year'}
 
 app.title = "Football Visualization"

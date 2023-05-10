@@ -17,6 +17,7 @@ theme = {
 }
 
 if __name__ == '__main__':
+
     app.layout = html.Div(
         id="app-container",
         children=[
