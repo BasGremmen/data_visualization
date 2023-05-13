@@ -13,7 +13,8 @@ layout = dcc.Tab(label='Explore Players', children=[
             dcc.Dropdown(
                 id='explore-stats-dropdown',
                 options=[{'label': stat, 'value': stat} for stat in player_tables],
-                style={'width': '100%'}
+                style={'width': '100%'},
+                value='player_defense'
             ),
         ], className='six columns'),
 
@@ -21,7 +22,8 @@ layout = dcc.Tab(label='Explore Players', children=[
             html.Label('Select Feature'),
             dcc.Dropdown(
                 id='explore-feature-dropdown',
-                style={'width': '100%'}
+                style={'width': '100%'},
+                value='age'
             ),
         ], className='six columns'),
     ], className='row', style={'marginBottom': '10px'}),
@@ -62,14 +64,33 @@ layout = dcc.Tab(label='Explore Players', children=[
 
 
 @callback(
-    Output('explore-radar-chart', 'figure'),
+    Output('selected-players', 'value'),
     Input('top-players-chart', 'clickData'),
+    State('selected-players', 'value'),
+
+)
+def add_to_selection(clickData, players):
+    if players is None:
+        players = []
+
+    if clickData is None:
+        return players
+
+    player = clickData['points'][0]['customdata'][0]
+    if player not in players:
+        players.append(player)
+    return players
+
+
+@callback(
+    Output('explore-radar-chart', 'figure'),
+    Input('top-players-chart', 'hoverData'),
     State('explore-stats-dropdown', 'value'))
-def update_explore_radar_chart(clickData, selected_stat):
-    if clickData is None or selected_stat is None:
+def update_explore_radar_chart(hoverData, selected_stat):
+    if hoverData is None or selected_stat is None:
         return go.Figure()
 
-    selected_players = [point['customdata'][0] for point in clickData['points']]
+    selected_players = [point['customdata'][0] for point in hoverData['points']]
 
     df = dataframes[selected_stat].copy()
     radar_data = []
@@ -95,7 +116,6 @@ def update_explore_radar_chart(clickData, selected_stat):
     return go.Figure(data=radar_data, layout=layout).update_layout(legend=dict(font=dict(family='Arial')), polar=dict(
         radialaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=False, ticks=''),
         angularaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=True, ticks='')))
-
 
 @callback(
     Output('top-players-chart', 'figure'),

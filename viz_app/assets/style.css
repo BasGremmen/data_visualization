@@ -46,3 +46,18 @@ h5 {
     padding-bottom: 7px;
     border-bottom:  1px solid #ccc;
 }
+
+ul {
+    padding: 4px;
+}
+
+li {
+    list-style-type: none;
+    border-bottom: 1px solid #f4f4f4;
+}
+
+li:hover {
+    color: #660000;
+    font-weight: bold;
+    list-style-type: "\274C";
+}

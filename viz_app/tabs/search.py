@@ -50,17 +50,12 @@ layout = dcc.Tab(label='Find Players', children=[
     html.Div([
         html.Div([
             dcc.Graph(id='bar-chart'),
-        ], className='six columns', style={'marginBottom': '20px'}),
+        ], className='six columns'),
 
         html.Div([
             dcc.Graph(id='radar-chart'),
-        ], className='six columns', style={'marginBottom': '20px'}),
-    ], className='row'),
-
-    html.Div([
-        dcc.Graph(id='scatter-plot'),
-
-    ], className='row', style={"marginBottom": '20px'}),
+        ], className='six columns'),
+    ], className='row', style={'marginBottom': '20px'}),
 ])
 
 
@@ -75,8 +70,8 @@ def update_feature_and_team_dropdown(selected_stat):
     df = dataframes[selected_stat].copy()
     teams = df['team'].unique()
     team_options = [{'label': team, 'value': team} for team in teams]
-
-    features = df.columns.difference(['player', 'team']).difference(exclude_columns)
+    numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+    features = df.select_dtypes(include=numerics).columns.difference(['player', 'team']).difference(exclude_columns)
     feature_options = [{'label': feature, 'value': feature} for feature in features]
 
     return feature_options, team_options
@@ -101,14 +96,22 @@ def update_player_dropdown(selected_teams, selected_stat):
     Input('feature-dropdown', 'value'),
     Input('player-dropdown', 'value'))
 def update_bar_chart(selected_stat, selected_features, selected_players):
-    if selected_stat is None or selected_features is None or not selected_features or selected_players is None or not selected_players:
+    if selected_stat is None:
         return go.Figure()
 
-    df = dataframes[selected_stat].copy()
-    bar_data = df[df['player'].isin(selected_players)]
+    bar_data = dataframes[selected_stat].copy()
+
+    if selected_players is None or len(selected_players) < 1:
+        selected_players = list(bar_data['player'])
+
+    bar_data = bar_data[bar_data['player'].isin(selected_players)]
+
+    if selected_features is None or len(selected_features) < 1:
+        numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+        selected_features = bar_data.select_dtypes(include=numerics).columns.difference(['player', 'team']).difference(exclude_columns)
 
     # Bar colors
-    bar_colors = px.colors.qualitative.Plotly[:len(selected_players)]
+    bar_colors = px.colors.qualitative.Plotly[:bar_data.shape[0]]
 
     return px.bar(bar_data, x='player', y=selected_features, barmode='group', title='Selected Features for Players',
                   color_discrete_sequence=bar_colors)
@@ -146,35 +149,3 @@ def update_radar_chart(selected_stat, selected_features, selected_players):
     return go.Figure(data=radar_data, layout=layout).update_layout(legend=dict(font=dict(family='Arial')), polar=dict(
         radialaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=False, ticks=''),
         angularaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=True, ticks='')))
-
-
-@callback(
-    Output('scatter-plot', 'figure'),
-    Input('stats-dropdown', 'value'),
-    Input('feature-dropdown', 'value'),
-    Input('player-dropdown', 'value'))
-def update_scatter_plot(selected_stat, selected_features, selected_players):
-    if selected_stat is None or selected_features is None or not selected_features or len(
-            selected_features) < 2 or selected_players is None or not selected_players:
-        return go.Figure()
-
-    df = dataframes[selected_stat].copy()
-    selected_data = df[df['player'].isin(selected_players)]
-
-    fig = go.Figure()
-
-    for player in selected_players:
-        player_data = selected_data[selected_data['player'] == player]
-        fig.add_trace(
-            go.Scatter(x=player_data[selected_features[0]], y=player_data[selected_features[1]], mode='markers',
-                       marker=dict(size=12), name=player, text=player_data['team'],
-                       hovertemplate='%{text}<br>%{xaxis.title.text}: %{x}<br>%{yaxis.title.text}: %{y}'))
-
-    fig.update_layout(title=f'Scatter plot of {selected_features[0]} vs {selected_features[1]}',
-                      xaxis_title=selected_features[0], yaxis_title=selected_features[1])
-
-    return fig.update_layout(legend=dict(font=dict(family='Arial')),
-                             xaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=True,
-                                        ticks=''),
-                             yaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=True,
-                                        ticks=''))
