@@ -58,6 +58,9 @@ def update_compare_radar_chart(players, selected_stat, selected_features):
         selected_features = features
 
     radar_data = []
+    numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+    numerics = df.select_dtypes(include=numerics).columns
+    df[numerics] = (df[numerics]-df[numerics].min())/(df[numerics].max()-df[numerics].min())
 
 
     for player in players:
