@@ -87,8 +87,10 @@ def add_to_selection(clickData, players):
     Input('top-players-chart', 'hoverData'),
     State('explore-stats-dropdown', 'value'))
 def update_explore_radar_chart(hoverData, selected_stat):
+    title = 'Hover over a player to view'
     if hoverData is None or selected_stat is None:
-        return go.Figure()
+        layout_empty = go.Layout(title=title)
+        return go.Figure(layout=layout_empty)
 
     selected_players = [point['customdata'][0] for point in hoverData['points']]
 
@@ -106,9 +108,10 @@ def update_explore_radar_chart(hoverData, selected_stat):
                 name=player
             )
         )
+        title = f'Radar plot with features of {player}'
 
     layout = go.Layout(
-        title=f'Radar chart of selected players',
+        title=title,
         polar=dict(radialaxis=dict(visible=True, range=[0, max(df[features].max().max(), 1)])),
         showlegend=True
     )

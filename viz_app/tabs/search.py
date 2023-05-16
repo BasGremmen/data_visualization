@@ -111,9 +111,9 @@ def update_bar_chart(selected_stat, selected_features, selected_players):
         selected_features = bar_data.select_dtypes(include=numerics).columns.difference(['player', 'team']).difference(exclude_columns)
 
     # Bar colors
-    bar_colors = px.colors.qualitative.Plotly[:bar_data.shape[0]]
+    bar_colors = px.colors.qualitative.Plotly[:bar_data.shape[1]]
 
-    return px.bar(bar_data, x='player', y=selected_features, barmode='group', title='Selected Features for Players',
+    return px.bar(bar_data, x='player', y=selected_features, custom_data=['player'], barmode='group', title='Selected Features for Players',
                   color_discrete_sequence=bar_colors)
 
 
@@ -149,3 +149,23 @@ def update_radar_chart(selected_stat, selected_features, selected_players):
     return go.Figure(data=radar_data, layout=layout).update_layout(legend=dict(font=dict(family='Arial')), polar=dict(
         radialaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=False, ticks=''),
         angularaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=True, ticks='')))
+
+
+@callback(
+    Output('selected-players', 'value', allow_duplicate=True),
+    Input('bar-chart', 'clickData'),
+    State('selected-players', 'value'),
+    prevent_initial_call=True
+)
+def add_to_selection(clickData, players):
+    if players is None:
+        players = []
+
+    if clickData is None:
+        return players
+
+
+    player = clickData['points'][0]['label']
+    if player not in players:
+        players.append(player)
+    return players
