@@ -1,3 +1,4 @@
+# Similar imports as in explore and compare
 from dash import callback, Input, Output, dcc, html, Dash, State
 import plotly.graph_objs as go
 import plotly.express as px
@@ -5,6 +6,7 @@ import plotly.express as px
 from viz_app.main import dataframes, exclude_columns
 from viz_app.config import player_tables
 
+# The html structure is almost identical to the explore tab, with 2 rows of input and 1 row of output
 layout = dcc.Tab(label='Find Players', children=[
     html.Div([
         html.Div([
@@ -59,6 +61,7 @@ layout = dcc.Tab(label='Find Players', children=[
 ])
 
 
+# Here we update the feature-dropdown and team-dropdown to only contain numerical columns
 @callback(
     Output('feature-dropdown', 'options'),
     Output('team-dropdown', 'options'),
@@ -77,6 +80,7 @@ def update_feature_and_team_dropdown(selected_stat):
     return feature_options, team_options
 
 
+# This callback simply update the player dropdown with the selected team and dataset dropdown.
 @callback(
     Output('player-dropdown', 'options'),
     Input('team-dropdown', 'value'),
@@ -90,12 +94,14 @@ def update_player_dropdown(selected_teams, selected_stat):
     return [{'label': player, 'value': player} for player in players]
 
 
+# Here we update the bar chart based on the input menus
 @callback(
     Output('bar-chart', 'figure'),
     Input('stats-dropdown', 'value'),
     Input('feature-dropdown', 'value'),
     Input('player-dropdown', 'value'))
 def update_bar_chart(selected_stat, selected_features, selected_players):
+    # some checks for valid data
     if selected_stat is None:
         return go.Figure()
 
@@ -110,25 +116,28 @@ def update_bar_chart(selected_stat, selected_features, selected_players):
         numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
         selected_features = bar_data.select_dtypes(include=numerics).columns.difference(['player', 'team']).difference(exclude_columns)
 
-    # Bar colors
+    # Bar colors based on amount of data
     bar_colors = px.colors.qualitative.Plotly[:bar_data.shape[1]]
 
+    # simply returning the data
     return px.bar(bar_data, x='player', y=selected_features, custom_data=['player'], barmode='group', title='Selected Features for Players',
                   color_discrete_sequence=bar_colors)
 
-
+# The radar chart updates based on selected players
 @callback(
     Output('radar-chart', 'figure'),
     Input('stats-dropdown', 'value'),
     Input('feature-dropdown', 'value'),
     Input('player-dropdown', 'value'))
 def update_radar_chart(selected_stat, selected_features, selected_players):
+    # check for valid data
     if selected_stat is None or selected_features is None or not selected_features or selected_players is None or not selected_players:
         return go.Figure()
 
     df = dataframes[selected_stat].copy()
     radar_data = []
 
+    # for every player, add their data
     for player in selected_players:
         player_data = df[df['player'] == player].iloc[0]
         radar_data.append(
@@ -139,18 +148,20 @@ def update_radar_chart(selected_stat, selected_features, selected_players):
                 name=player
             )
         )
-
+    # update radar chart title and range using the max().max() trick as discussed in the explore,py
     layout = go.Layout(
         title=f'Radar chart of selected players',
         polar=dict(radialaxis=dict(visible=True, range=[0, max(df[selected_features].max().max(), 1)])),
         showlegend=True
     )
 
+    # returning the figure with the updated layout
     return go.Figure(data=radar_data, layout=layout).update_layout(legend=dict(font=dict(family='Arial')), polar=dict(
         radialaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=False, ticks=''),
         angularaxis=dict(linecolor='darkgray', gridcolor='lightgray', linewidth=1, showticklabels=True, ticks='')))
 
 
+# clicking within the bar graph allows for player selection using this callback
 @callback(
     Output('selected-players', 'value', allow_duplicate=True),
     Input('bar-chart', 'clickData'),
